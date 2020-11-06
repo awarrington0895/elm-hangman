@@ -1,20 +1,21 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, text, div, h1, img)
-import Html.Attributes exposing (src)
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (onInput)
 
 
 ---- MODEL ----
 
 
 type alias Model =
-    {}
+    { phrase : String }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( {}, Cmd.none )
+    ( { phrase = "Here is my special phrase!" }, Cmd.none )
 
 
 
@@ -36,10 +37,33 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ img [ src "/logo.svg" ] []
-        , h1 [] [ text "Your Elm App is working!" ]
-        ]
+    div [] 
+    [ phraseHtml model.phrase
+    , guessButtons
+    ]
+
+
+phraseHtml : String -> Html Msg
+phraseHtml phrase =
+    phrase
+        |> String.split ""
+        |> List.map (\char -> 
+                if char == " " then
+                    " "
+                else
+                    "_"
+            )
+        |> List.map (\char -> span [ class "phraseChar" ] [ text char ])
+        |> div []
+
+
+
+guessButtons : Html Msg
+guessButtons = 
+    "abcdefghijklmnopqrstuvwxyz"
+        |> String.split ""
+        |> List.map (\char -> button [] [ text char ])
+        |> div []
 
 
 

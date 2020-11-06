@@ -24,3 +24,9 @@ img {
   margin: 20px 0;
   max-width: 200px;
 }
+
+.phraseChar {
+    font-weight: bold;
+    font-size: 1.5rem;
+    padding: 0 5px;
+}
