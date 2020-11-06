@@ -3,19 +3,23 @@ module Main exposing (..)
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onClick)
+import Set exposing (Set)
+
 
 
 ---- MODEL ----
 
 
 type alias Model =
-    { phrase : String }
+    { phrase : String
+    , guesses : Set String
+    }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { phrase = "Here is my special phrase!" }, Cmd.none )
+    ( { phrase = "Here is my special phrase", guesses = Set.empty }, Cmd.none )
 
 
 
@@ -23,12 +27,14 @@ init =
 
 
 type Msg
-    = NoOp
+    = Guess String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model, Cmd.none )
+    case msg of
+        Guess guess ->
+            ( { model | guesses = Set.insert guess model.guesses }, Cmd.none )
 
 
 
@@ -37,33 +43,63 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [] 
-    [ phraseHtml model.phrase
-    , guessButtons
-    ]
+    div []
+        [ phraseHtml model
+        , guessButtons
+        , incorrectGuesses model
+        ]
 
 
-phraseHtml : String -> Html Msg
-phraseHtml phrase =
-    phrase
+phraseHtml : Model -> Html Msg
+phraseHtml model =
+    model.phrase
         |> String.split ""
-        |> List.map (\char -> 
+        |> List.map
+            (\char ->
                 if char == " " then
                     " "
+
+                else if (Set.member char model.guesses) then
+                    char
+
                 else
                     "_"
             )
         |> List.map (\char -> span [ class "phraseChar" ] [ text char ])
-        |> div []
-
+        |> div [ class "phrase" ]
 
 
 guessButtons : Html Msg
-guessButtons = 
+guessButtons =
     "abcdefghijklmnopqrstuvwxyz"
         |> String.split ""
-        |> List.map (\char -> button [] [ text char ])
+        |> List.map
+            (\char ->
+                button
+                    [ class "guess-button btn btn-primary"
+                    , onClick <| Guess char
+                    ]
+                    [ text char ]
+            )
         |> div []
+
+
+
+phraseSet : String -> Set String
+phraseSet phrase =
+    phrase
+        |> String.split ""
+        |> Set.fromList
+
+
+incorrectGuesses : Model -> Html Msg
+incorrectGuesses model =
+    model.guesses
+        |> Set.toList
+        |> List.filter (\guess -> not <| Set.member guess (phraseSet model.phrase))
+        |> List.map (\char -> span [] [ text char ])
+        |> div []
+
 
 
 
